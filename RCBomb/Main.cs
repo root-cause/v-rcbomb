@@ -18,6 +18,7 @@ namespace RCBomb
         public bool ScriptLoaded = false;
         public bool RCBombActive = false;
         public int SpawnControlPressedAt = 0;
+        public int PrevCamMode = 0;
         public int NextUpdate = 0;
         public int NextVehicleCheck = 0;
 
@@ -27,6 +28,7 @@ namespace RCBomb
 
         // Config variables
         public bool ShowControls = true;
+        public bool FPSCamera = false;
         public float MaxDistance = 200.0f;
         public int SpawnControl = 51;
         public int DetonateControl = 47;
@@ -90,6 +92,8 @@ namespace RCBomb
             Game.Player.Character.SetIntoVehicle(RCSpawner, VehicleSeat.Driver);
             RCVehicle.MarkAsNoLongerNeeded();
 
+            if (FPSCamera) Function.Call(Hash.SET_FOLLOW_VEHICLE_CAM_VIEW_MODE, PrevCamMode);
+
             Wait(Constants.FadeTime);
             Game.FadeScreenIn(Constants.FadeTime);
 
@@ -109,6 +113,7 @@ namespace RCBomb
                 if (File.Exists(configPath))
                 {
                     ShowControls = config.GetValue("CONFIG", "ShowControls", true);
+                    FPSCamera = config.GetValue("CONFIG", "FPSCamera", false);
                     MaxDistance = config.GetValue("CONFIG", "MaxDistance", 200.0f);
                     SpawnControl = config.GetValue("CONTROLS", "SpawnControl", 51);
                     DetonateControl = config.GetValue("CONTROLS", "DetonateControl", 47);
@@ -116,6 +121,7 @@ namespace RCBomb
                 else
                 {
                     config.SetValue("CONFIG", "ShowControls", ShowControls);
+                    config.SetValue("CONFIG", "FPSCamera", FPSCamera);
                     config.SetValue("CONFIG", "MaxDistance", MaxDistance);
                     config.SetValue("CONTROLS", "SpawnControl", SpawnControl);
                     config.SetValue("CONTROLS", "DetonateControl", DetonateControl);
@@ -203,7 +209,10 @@ namespace RCBomb
             if (RCBombActive)
             {
                 if (ShowControls) DisplayHelpText($"Press {HelpTextKeys.Get(DetonateControl)} to detonate the RC car.");
+
                 foreach (Control control in Constants.ControlsToDisable) Game.DisableControlThisFrame(2, control);
+                if (FPSCamera) Game.DisableControlThisFrame(2, Control.NextCamera);
+
                 if (Game.IsControlJustPressed(2, (Control)DetonateControl)) Detonate();
 
                 if (gameTime > NextUpdate)
@@ -231,6 +240,8 @@ namespace RCBomb
                         Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, 1.0f);
                         Function.Call(Hash.CLEAR_TIMECYCLE_MODIFIER);
                         Function.Call(Hash.DISPLAY_RADAR, true);
+
+                        if (FPSCamera) Function.Call(Hash.SET_FOLLOW_VEHICLE_CAM_VIEW_MODE, PrevCamMode);
 
                         Game.Player.Character.IsExplosionProof = false;
                         RCBombActive = false;
@@ -266,6 +277,8 @@ namespace RCBomb
         {
             if (RCBombActive)
             {
+                if (FPSCamera) Function.Call(Hash.SET_FOLLOW_VEHICLE_CAM_VIEW_MODE, PrevCamMode);
+
                 Game.Player.Character.IsExplosionProof = false;
                 Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, 1.0f);
                 Function.Call(Hash.CLEAR_TIMECYCLE_MODIFIER);
@@ -302,6 +315,13 @@ namespace RCBomb
             Game.Player.Character.IsExplosionProof = true;
             Game.Player.Character.SetIntoVehicle(RCVehicle, VehicleSeat.Driver);
             Game.Player.Character.Weapons.Select(WeaponHash.Unarmed);
+
+            if (FPSCamera)
+            {
+                PrevCamMode = Function.Call<int>(Hash.GET_FOLLOW_VEHICLE_CAM_VIEW_MODE);
+                Function.Call(Hash.SET_FOLLOW_VEHICLE_CAM_VIEW_MODE, 4);
+            }
+
             Game.FadeScreenIn(Constants.FadeTime);
 
             RCBombActive = true;
