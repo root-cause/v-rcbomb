@@ -14,7 +14,7 @@ namespace RCBomb
 
         public const string TimecycleModifier = "CAMERA_secuirity_FUZZ";
         public const float TimecycleStrengthBase = 0.15f;
-        public const float TimecycleStrengthDistMultiplier = 0.005f;
+        public const float TimecycleStrengthMax = 1.25f;
 
         public static readonly Control[] ControlsToDisable = { Control.CharacterWheel, Control.SelectWeapon, Control.VehicleExit, Control.VehicleSelectNextWeapon, Control.VehicleSelectPrevWeapon };
     }

@@ -100,6 +100,12 @@ namespace RCBomb
             Game.Player.Character.IsExplosionProof = false;
             RCVehicle = null;
         }
+
+        // Credits to https://stackoverflow.com/a/31687097
+        public float ScaleBetween(float unscaledNum, float minAllowed, float maxAllowed, float min, float max)
+        {
+            return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
+        }
         #endregion
 
         public Main()
@@ -224,7 +230,7 @@ namespace RCBomb
                         float distance = RCVehicle.Position.DistanceTo(RCSpawner.Position);
                         if (distance <= MaxDistance)
                         {
-                            Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, Constants.TimecycleStrengthBase + (distance * Constants.TimecycleStrengthDistMultiplier));
+                            Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, ScaleBetween(distance, Constants.TimecycleStrengthBase, Constants.TimecycleStrengthMax, 5.0f, MaxDistance));
                         }
                         else
                         {
