@@ -225,7 +225,7 @@ namespace RCBomb
                 {
                     NextUpdate = gameTime + Constants.UpdateInterval;
 
-                    if (Game.Player.Character.IsInVehicle(RCVehicle))
+                    if (RCVehicle != null && Game.Player.Character.IsInVehicle(RCVehicle))
                     {
                         float distance = RCVehicle.Position.DistanceTo(RCSpawner.Position);
                         if (distance <= MaxDistance)
@@ -242,7 +242,7 @@ namespace RCBomb
                     {
                         UI.Notify("Left the RC car.");
 
-                        RCVehicle.Delete();
+                        RCVehicle?.Delete();
                         Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, 1.0f);
                         Function.Call(Hash.CLEAR_TIMECYCLE_MODIFIER);
                         Function.Call(Hash.DISPLAY_RADAR, true);
